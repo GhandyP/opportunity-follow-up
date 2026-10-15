@@ -4,9 +4,11 @@
 
 Prepare a next-step message from supplied opportunity facts and last-contact text without reading a CRM or sending an email.
 
-## Run the current prototype
+## Run in the host module
 
-From this case directory:
+This repository is a source-only snapshot and is not runnable by itself: it has no `go.mod` file and does not include the `internal/adkhelper` package imported by `main.go`. Go's `internal` package rule also requires this case to live within the `github.com/GhandyP/adk-go-enterprise-cookbook` module.
+
+To run it, use this case within a checkout of that host module, then run from the case directory:
 
 ```bash
 export GOOGLE_API_KEY="your-key"
