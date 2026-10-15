@@ -1,21 +1,30 @@
 package main
 
 import (
-	"context"
+	"errors"
 	"log"
-	"os"
+	"net/http"
+	"time"
 
-	"github.com/GhandyP/adk-go-enterprise-cookbook/internal/adkhelper"
+	"github.com/GhandyP/opportunity-follow-up/internal/config"
+	"github.com/GhandyP/opportunity-follow-up/internal/web"
 )
 
 func main() {
-	if err := adkhelper.Run(
-		context.Background(),
-		os.Args[1:],
-		"case_41_opportunity_follow_up",
-		"A text-only starting point for opportunity follow-up.",
-		"Prepare an opportunity follow-up from account facts and last-contact text supplied by the user. Draft a next message without changing pipeline data or claiming CRM access.",
-	); err != nil {
+	cfg, err := config.Load()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	server := &http.Server{
+		Addr:              cfg.HTTPAddr,
+		Handler:           web.NewHandler(),
+		ReadHeaderTimeout: 5 * time.Second,
+		IdleTimeout:       60 * time.Second,
+	}
+
+	log.Printf("listening on http://%s", server.Addr)
+	if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		log.Fatal(err)
 	}
 }
