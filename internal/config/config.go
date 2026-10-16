@@ -8,10 +8,16 @@ import (
 	"strings"
 )
 
-const defaultHTTPAddr = "127.0.0.1:8080"
+const (
+	defaultHTTPAddr      = "127.0.0.1:8080"
+	defaultHistoryDBPath = "data/opportunity-follow-up.sqlite"
+)
 
 type Config struct {
-	HTTPAddr string
+	HTTPAddr      string
+	HistoryDBPath string
+	GoogleAPIKey  string
+	GeminiModel   string
 }
 
 func Load() (Config, error) {
@@ -30,7 +36,17 @@ func Load() (Config, error) {
 		return Config{}, fmt.Errorf("APP_ADDR must use a loopback host and valid port")
 	}
 
-	return Config{HTTPAddr: addr}, nil
+	historyDBPath := strings.TrimSpace(os.Getenv("HISTORY_DB_PATH"))
+	if historyDBPath == "" {
+		historyDBPath = defaultHistoryDBPath
+	}
+
+	return Config{
+		HTTPAddr:      addr,
+		HistoryDBPath: historyDBPath,
+		GoogleAPIKey:  strings.TrimSpace(os.Getenv("GOOGLE_API_KEY")),
+		GeminiModel:   strings.TrimSpace(os.Getenv("GEMINI_MODEL")),
+	}, nil
 }
 
 func isLoopbackHost(host string) bool {
