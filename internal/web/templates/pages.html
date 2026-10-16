@@ -1,0 +1,272 @@
+{{define "siteHeader"}}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>{{.Title}} · Opportunity follow-up</title>
+  <link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to content</a>
+  <header class="topbar">
+    <a class="brand" href="/">Opportunity follow-up</a>
+    <span class="local-badge">LOCAL WORKSPACE <span aria-hidden="true">·</span> NOT SENT</span>
+  </header>
+  <nav class="primary-nav" aria-label="Primary navigation">
+    <a href="/" {{if eq .ActiveNav "new"}}class="active" aria-current="page"{{end}}>New opportunity</a>
+    <a href="/history" {{if eq .ActiveNav "history"}}class="active" aria-current="page"{{end}}>History</a>
+    <span class="owner-note">Owner review required</span>
+  </nav>
+{{end}}
+
+{{define "siteFooter"}}
+  <footer class="site-footer">
+    <span>Local history only.</span>
+    <span>No messages are sent and no CRM or pipeline records are changed.</span>
+  </footer>
+</body>
+</html>
+{{end}}
+
+{{define "home"}}
+{{template "siteHeader" .}}
+<main id="main-content" class="workspace">
+  <section class="column" aria-labelledby="opportunity-heading">
+    <div class="page-heading">
+      <p class="eyebrow">NEW OPPORTUNITY</p>
+      <h1 id="opportunity-heading">Opportunity details</h1>
+      <p class="subheading">Supply the facts. Review every draft before use.</p>
+    </div>
+    {{if .Notice}}<div class="notice notice-error" role="alert">{{.Notice}}</div>{{end}}
+    <form class="panel form-panel" action="/opportunities" method="post">
+      <div class="panel-heading">
+        <h2>Opportunity details</h2>
+        <p>Only information you provide is used.</p>
+      </div>
+      <div class="field-grid">
+        <div class="field">
+          <label for="opportunity-id">Opportunity ID <span class="optional">optional</span></label>
+          <input id="opportunity-id" name="opportunity_id" value="{{.Form.ID}}" autocomplete="off" placeholder="e.g. FF-204">
+          <p class="help">A local record number is added automatically.</p>
+        </div>
+        <div class="field">
+          <label for="stage">Current stage</label>
+          <input id="stage" name="stage" value="{{.Form.Stage}}" autocomplete="off" placeholder="e.g. Evaluation">
+          <p class="help">Closed stages block follow-up.</p>
+        </div>
+        <div class="field field-wide">
+          <label for="goal">Desired outcome</label>
+          <input id="goal" name="goal" value="{{.Form.Goal}}" placeholder="What should the next step clarify?">
+        </div>
+        <div class="field field-wide">
+          <label for="last-contact">Last-contact text</label>
+          <textarea id="last-contact" name="last_contact" rows="3" placeholder="Paste the relevant, manually supplied last-contact context">{{.Form.LastContact}}</textarea>
+        </div>
+        <div class="field field-wide">
+          <label for="facts">Supplied facts</label>
+          <textarea id="facts" name="facts" rows="5" aria-describedby="facts-help" placeholder="F-01 | Jordan requested a two-week pilot outline.&#10;F-02 | Weekday receiving hours were confirmed.">{{.Form.FactsText}}</textarea>
+          <p class="help" id="facts-help">One fact per line, in the format <code>ID | fact text</code>. Example details are fictional.</p>
+        </div>
+        <div class="field">
+          <label for="contact-id">Contact ID</label>
+          <input id="contact-id" name="contact_id" value="{{.Form.ContactID}}" autocomplete="off" placeholder="e.g. C-01">
+        </div>
+        <div class="field">
+          <label for="contact-name">Contact name</label>
+          <input id="contact-name" name="contact_name" value="{{.Form.ContactName}}" autocomplete="name" placeholder="e.g. Jordan Lee">
+        </div>
+      </div>
+      <fieldset class="safety-fields">
+        <legend>Owner-declared safety checks</legend>
+        <label class="check-row">
+          <input type="checkbox" name="opted_out" value="true" {{if .Form.OptedOut}}checked{{end}}>
+          <span>The selected contact has opted out.</span>
+        </label>
+        <label class="check-row">
+          <input type="checkbox" name="stale" value="true" {{if .Form.Stale}}checked{{end}}>
+          <span>I marked the opportunity data or stage as stale.</span>
+        </label>
+        <p class="help">Staleness is never inferred from age.</p>
+      </fieldset>
+      <div class="form-actions">
+        <button type="submit">Assess &amp; draft</button>
+      </div>
+    </form>
+  </section>
+
+  <section class="column" aria-labelledby="draft-heading">
+    <div class="page-heading">
+      <p class="eyebrow">HUMAN REVIEW</p>
+      <h1 id="draft-heading">Draft review</h1>
+      <p class="subheading">Evidence stays beside the words it supports.</p>
+    </div>
+    <div class="panel preview-panel">
+      <div class="status status-neutral"><span class="status-mark" aria-hidden="true">●</span> Eligibility comes first</div>
+      <p class="preview-copy">After you submit, the app will either ask for missing information, explain why follow-up is blocked, or show an evidence-backed draft for your review.</p>
+      <div class="evidence placeholder-evidence">
+        <span class="reference-tag">F-01</span>
+        <span>Supplied facts appear here beside the draft they support.</span>
+      </div>
+      <div class="owner-note-card">
+        <strong>Not sent</strong>
+        <p>Every draft is editable and requires owner review. This app does not contact people or update external systems.</p>
+      </div>
+    </div>
+  </section>
+</main>
+{{template "siteFooter" .}}
+{{end}}
+
+{{define "history"}}
+{{template "siteHeader" .}}
+<main id="main-content" class="single-column">
+  <section class="history-section" aria-labelledby="history-heading">
+    <div class="page-heading">
+      <p class="eyebrow">LOCAL WORKSPACE</p>
+      <h1 id="history-heading">Opportunity history</h1>
+      <p class="subheading">Revisit saved assessments and owner-edited drafts on this device.</p>
+    </div>
+    {{if .Notice}}<div class="notice notice-error" role="alert">{{.Notice}}</div>{{end}}
+    {{if .Records}}
+      <ol class="history-list">
+        {{range .Records}}
+        <li>
+          <article class="history-card">
+            <div class="history-card-header">
+              <h2><a href="/history/{{.ID}}">{{if .Input.ID}}{{.Input.ID}}{{else}}Opportunity record {{.ID}}{{end}}</a></h2>
+              <span class="status status-{{statusClass .Assessment.Status}}">{{statusLabel .Assessment.Status}}</span>
+            </div>
+            <div class="record-meta">
+              <span><strong>Stage</strong> {{if .Input.Stage}}{{.Input.Stage}}{{else}}Not provided{{end}}</span>
+              <span><strong>Updated</strong> {{formatTime .UpdatedAt}}</span>
+              <span><strong>Local record</strong> #{{.ID}}</span>
+            </div>
+            {{if .DraftMessage}}
+              <p class="history-draft">{{.DraftMessage}}</p>
+            {{else}}
+              <p class="history-empty-draft">No editable draft is saved for this assessment.</p>
+            {{end}}
+            <a class="text-link" href="/history/{{.ID}}">Review this record <span aria-hidden="true">→</span></a>
+          </article>
+        </li>
+        {{end}}
+      </ol>
+    {{else}}
+      <div class="panel empty-state">
+        <h2>No opportunities in your local history yet.</h2>
+        <p>Assess an opportunity to save its supplied details and any editable draft here.</p>
+        <a class="button-link" href="/">Enter opportunity details</a>
+      </div>
+    {{end}}
+  </section>
+</main>
+{{template "siteFooter" .}}
+{{end}}
+
+{{define "detail"}}
+{{template "siteHeader" .}}
+<main id="main-content" class="workspace detail-workspace">
+  <section class="column" aria-labelledby="record-heading">
+    <div class="page-heading">
+      <p class="eyebrow">LOCAL RECORD #{{.Record.ID}}</p>
+      <h1 id="record-heading">{{if .Record.Input.ID}}{{.Record.Input.ID}}{{else}}Opportunity review{{end}}</h1>
+      <p class="subheading">Supplied details and assessment. Nothing was sent.</p>
+    </div>
+    <div class="panel record-panel">
+      <div class="record-facts-grid">
+        <div class="record-value">
+          <span class="field-label">Stage</span>
+          <span>{{if .Record.Input.Stage}}{{.Record.Input.Stage}}{{else}}Not provided{{end}}</span>
+        </div>
+        <div class="record-value">
+          <span class="field-label">Contact</span>
+          {{if .Record.Input.Contacts}}
+            <span>{{(index .Record.Input.Contacts 0).Name}}</span>
+            <small>{{(index .Record.Input.Contacts 0).ID}}</small>
+          {{else}}
+            <span>Not provided</span>
+          {{end}}
+        </div>
+        <div class="record-value record-wide">
+          <span class="field-label">Desired outcome</span>
+          <span>{{if .Record.Input.Goal}}{{.Record.Input.Goal}}{{else}}Not provided{{end}}</span>
+        </div>
+        <div class="record-value record-wide">
+          <span class="field-label">Last contact</span>
+          <span>{{if .Record.Input.LastContact}}{{.Record.Input.LastContact}}{{else}}Not provided{{end}}</span>
+        </div>
+      </div>
+      <h2 class="section-heading">Supplied facts</h2>
+      {{if .Record.Input.Facts}}
+        <ul class="fact-list">
+          {{range .Record.Input.Facts}}
+          <li class="fact-row"><span class="reference-tag">{{.ID}}</span><span>{{.Text}}</span></li>
+          {{end}}
+        </ul>
+      {{else}}
+        <p class="muted">No facts were supplied.</p>
+      {{end}}
+      <p class="record-timestamp">Saved {{formatTime .Record.CreatedAt}} · Updated {{formatTime .Record.UpdatedAt}}</p>
+    </div>
+  </section>
+
+  <section class="column" aria-labelledby="draft-review-heading">
+    <div class="page-heading">
+      <p class="eyebrow">HUMAN REVIEW</p>
+      <h1 id="draft-review-heading">Draft review</h1>
+      <p class="subheading">Evidence stays beside the words it supports.</p>
+    </div>
+    <div class="panel review-panel">
+      <div class="status status-{{.StatusClass}}"><span class="status-mark" aria-hidden="true">●</span> {{.StatusLabel}}</div>
+      {{if .Notice}}<div class="notice notice-error" role="alert">{{.Notice}}</div>{{end}}
+      {{if .BlockMessage}}<div class="notice notice-blocked" role="status">{{.BlockMessage}}</div>{{end}}
+      {{if .Questions}}
+        <section class="question-panel" aria-labelledby="questions-heading">
+          <h2 id="questions-heading">Information to confirm</h2>
+          <ul>{{range .Questions}}<li>{{.}}</li>{{end}}</ul>
+        </section>
+      {{end}}
+      {{if and (eq .Record.Assessment.Status "ready") .Record.Plan}}
+        <form action="/history/{{.Record.ID}}/draft" method="post" class="draft-form">
+          <div class="field">
+            <label for="draft-message">Message <span class="editable-label">editable</span></label>
+            <textarea id="draft-message" name="draft_message" rows="6" required>{{.Record.DraftMessage}}</textarea>
+          </div>
+          <h2 class="section-heading">Evidence rail</h2>
+          <div class="evidence-list">
+            {{range .Evidence}}
+            <div class="evidence"><span class="reference-tag">{{.ID}}</span><span>{{.Text}}</span></div>
+            {{end}}
+          </div>
+          <div class="field next-action-field">
+            <label for="draft-next-action">Next action <span class="editable-label">editable</span></label>
+            <textarea id="draft-next-action" name="draft_next_action" rows="2" required>{{.Record.DraftNextAction}}</textarea>
+          </div>
+          <div class="owner-note-card">
+            <strong>Not sent — owner review required.</strong>
+            <p>Save edits to local history. No message will be sent.</p>
+          </div>
+          <div class="form-actions">
+            <button type="submit">Save draft</button>
+          </div>
+        </form>
+        <details class="original-draft">
+          <summary>View original generated draft</summary>
+          <p>{{.Record.Plan.Message}}</p>
+          <p><strong>Original next action:</strong> {{.Record.Plan.NextAction}}</p>
+        </details>
+      {{else if and (eq .Record.Assessment.Status "ready") .Notice}}
+        <p class="muted">Your details are saved locally. Return to the new-opportunity form when generation is available.</p>
+      {{else if eq .Record.Assessment.Status "ready"}}
+        <p class="muted">No editable draft is available for this record.</p>
+      {{else}}
+        <p class="muted">No draft was generated. You can review this assessment in local history.</p>
+      {{end}}
+    </div>
+    <p class="back-link"><a class="text-link" href="/history">← Back to local history</a></p>
+  </section>
+</main>
+{{template "siteFooter" .}}
+{{end}}
